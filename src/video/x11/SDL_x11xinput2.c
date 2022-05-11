@@ -279,6 +279,9 @@ X11_HandleXinput2Event(SDL_VideoData *videodata, XGenericEventCookie *cookie)
     switch(cookie->evtype) {
         case XI_RawMotion: {
             const XIRawEvent *rawev = (const XIRawEvent*)cookie->data;
+            Uint32 timestamp = (videodata->timeSynced)
+                ? SDL_static_cast(Uint32, rawev->time & 0xFFFFFFFF) + videodata->timeSyncOffset
+                : 0;
             SDL_Mouse *mouse = SDL_GetMouse();
             SDL_XInput2DeviceInfo *devinfo;
             double coords[2];
@@ -311,7 +314,7 @@ X11_HandleXinput2Event(SDL_VideoData *videodata, XGenericEventCookie *cookie)
                 }
             }
 
-            SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 1, (int) processed_coords[0], (int) processed_coords[1]);
+            SDL_SendMouseMotion_t(mouse->focus, mouse->mouseID, 1, (int) processed_coords[0], (int) processed_coords[1], timestamp);
             devinfo->prev_coords[0] = coords[0];
             devinfo->prev_coords[1] = coords[1];
             devinfo->prev_time = rawev->time;
@@ -345,6 +348,9 @@ X11_HandleXinput2Event(SDL_VideoData *videodata, XGenericEventCookie *cookie)
           * so that we can distinguish real mouse motions from synthetic one.  */
         case XI_Motion: {
             const XIDeviceEvent *xev = (const XIDeviceEvent *) cookie->data;
+            Uint32 timestamp = (videodata->timeSynced)
+                ? xev->time + videodata->timeSyncOffset
+                : 0;
             int pointer_emulated = (xev->flags & XIPointerEmulated);
 
             if (! pointer_emulated) {
@@ -352,7 +358,7 @@ X11_HandleXinput2Event(SDL_VideoData *videodata, XGenericEventCookie *cookie)
                 if (!mouse->relative_mode || mouse->relative_mode_warp) {
                     SDL_Window *window = xinput2_get_sdlwindow(videodata, xev->event);
                     if (window) {
-                        SDL_SendMouseMotion(window, 0, 0, xev->event_x, xev->event_y);
+                        SDL_SendMouseMotion_t(window, 0, 0, xev->event_x, xev->event_y, timestamp);
                     }
                 }
             }

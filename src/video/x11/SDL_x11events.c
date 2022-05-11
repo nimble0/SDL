@@ -1306,24 +1306,30 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
         break;
 
     case MotionNotify:{
+            Uint32 timestamp = (videodata->timeSynced)
+                ? xevent->xmotion.time + videodata->timeSyncOffset
+                : 0;
             SDL_Mouse *mouse = SDL_GetMouse();
             if(!mouse->relative_mode || mouse->relative_mode_warp) {
 #ifdef DEBUG_MOTION
                 printf("window %p: X11 motion: %d,%d\n", data, xevent->xmotion.x, xevent->xmotion.y);
 #endif
 
-                SDL_SendMouseMotion(data->window, 0, 0, xevent->xmotion.x, xevent->xmotion.y);
+                SDL_SendMouseMotion_t(data->window, 0, 0, xevent->xmotion.x, xevent->xmotion.y, timestamp);
             }
         }
         break;
 
     case ButtonPress:{
+            Uint32 timestamp = (videodata->timeSynced)
+                ? xevent->xbutton.time + videodata->timeSyncOffset
+                : 0;
             int xticks = 0, yticks = 0;
 #ifdef DEBUG_XEVENTS
             printf("window %p: ButtonPress (X11 button = %d)\n", data, xevent->xbutton.button);
 #endif
             if (X11_IsWheelEvent(display,xevent,&xticks, &yticks)) {
-                SDL_SendMouseWheel(data->window, 0, (float) -xticks, (float) yticks, SDL_MOUSEWHEEL_NORMAL);
+                SDL_SendMouseWheel_t(data->window, 0, (float) -xticks, (float) yticks, SDL_MOUSEWHEEL_NORMAL, timestamp);
             } else {
                 SDL_bool ignore_click = SDL_FALSE;
                 int button = xevent->xbutton.button;
@@ -1346,7 +1352,7 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
                     data->last_focus_event_time = 0;
                 }
                 if (!ignore_click) {
-                    SDL_SendMouseButton(data->window, 0, SDL_PRESSED, button);
+                    SDL_SendMouseButton_t(data->window, 0, SDL_PRESSED, button, timestamp);
                 }
             }
             X11_UpdateUserTime(data, xevent->xbutton.time);
@@ -1354,6 +1360,9 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
         break;
 
     case ButtonRelease:{
+            Uint32 timestamp = (videodata->timeSynced)
+                ? xevent->xbutton.time + videodata->timeSyncOffset
+                : 0;
             int button = xevent->xbutton.button;
             /* The X server sends a Release event for each Press for wheels. Ignore them. */
             int xticks = 0, yticks = 0;
@@ -1365,7 +1374,7 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
                     /* see explanation at case ButtonPress */
                     button -= (8-SDL_BUTTON_X1);
                 }
-                SDL_SendMouseButton(data->window, 0, SDL_RELEASED, button);
+                SDL_SendMouseButton_t(data->window, 0, SDL_RELEASED, button, timestamp);
             }
         }
         break;
