@@ -689,7 +689,7 @@ SDL_SetKeyboardFocus(SDL_Window * window)
 }
 
 static int
-SDL_SendKeyboardKeyInternal(Uint8 source, Uint8 state, SDL_Scancode scancode)
+SDL_SendKeyboardKeyInternal(Uint8 source, Uint8 state, SDL_Scancode scancode, Uint32 timestamp)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
@@ -802,6 +802,7 @@ SDL_SendKeyboardKeyInternal(Uint8 source, Uint8 state, SDL_Scancode scancode)
     posted = 0;
     if (SDL_GetEventState(type) == SDL_ENABLE) {
         SDL_Event event;
+        event.key.timestamp = timestamp;
         event.key.type = type;
         event.key.state = state;
         event.key.repeat = repeat;
@@ -809,7 +810,7 @@ SDL_SendKeyboardKeyInternal(Uint8 source, Uint8 state, SDL_Scancode scancode)
         event.key.keysym.sym = keycode;
         event.key.keysym.mod = keyboard->modstate;
         event.key.windowID = keyboard->focus ? keyboard->focus->id : 0;
-        posted = (SDL_PushEvent(&event) > 0);
+        posted = (SDL_PushEvent_t(&event) > 0);
     }
 
     /* If the keyboard is grabbed and the grabbed window is in full-screen,
@@ -860,13 +861,19 @@ SDL_SendKeyboardUnicodeKey(Uint32 ch)
 int
 SDL_SendKeyboardKey(Uint8 state, SDL_Scancode scancode)
 {
-    return SDL_SendKeyboardKeyInternal(KEYBOARD_HARDWARE, state, scancode);
+    return SDL_SendKeyboardKeyInternal(KEYBOARD_HARDWARE, state, scancode, SDL_GetTicks());
+}
+
+int
+SDL_SendKeyboardKey_t(Uint8 state, SDL_Scancode scancode, Uint32 timestamp)
+{
+    return SDL_SendKeyboardKeyInternal(KEYBOARD_HARDWARE, state, scancode, timestamp);
 }
 
 int
 SDL_SendKeyboardKeyAutoRelease(SDL_Scancode scancode)
 {
-    return SDL_SendKeyboardKeyInternal(KEYBOARD_AUTORELEASE, SDL_PRESSED, scancode);
+    return SDL_SendKeyboardKeyInternal(KEYBOARD_AUTORELEASE, SDL_PRESSED, scancode, SDL_GetTicks());
 }
 
 void
@@ -878,7 +885,7 @@ SDL_ReleaseAutoReleaseKeys(void)
     if (keyboard->autorelease_pending) {
         for (scancode = SDL_SCANCODE_UNKNOWN; scancode < SDL_NUM_SCANCODES; ++scancode) {
             if (keyboard->keysource[scancode] == KEYBOARD_AUTORELEASE) {
-                SDL_SendKeyboardKeyInternal(KEYBOARD_AUTORELEASE, SDL_RELEASED, scancode);
+                SDL_SendKeyboardKeyInternal(KEYBOARD_AUTORELEASE, SDL_RELEASED, scancode, SDL_GetTicks());
             }
         }
         keyboard->autorelease_pending = SDL_FALSE;

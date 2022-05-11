@@ -53,6 +53,8 @@ extern int SDL_SendKeyboardUnicodeKey(Uint32 ch);
 extern int SDL_SendKeyboardKey(Uint8 state, SDL_Scancode scancode);
 extern int SDL_SendKeyboardKeyAutoRelease(SDL_Scancode scancode);
 
+extern int SDL_SendKeyboardKey_t(Uint8 state, SDL_Scancode scancode, Uint32 timestamp);
+
 /* Release all the autorelease keys */
 extern void SDL_ReleaseAutoReleaseKeys(void);
 

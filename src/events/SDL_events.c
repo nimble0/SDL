@@ -1117,7 +1117,12 @@ int
 SDL_PushEvent(SDL_Event * event)
 {
     event->common.timestamp = SDL_GetTicks();
+    SDL_PushEvent_t(event);
+}
 
+int
+SDL_PushEvent_t(SDL_Event * event)
+{
     if (SDL_EventOK.callback || SDL_event_watchers_count > 0) {
         if (!SDL_event_watchers_lock || SDL_LockMutex(SDL_event_watchers_lock) == 0) {
             if (SDL_EventOK.callback && !SDL_EventOK.callback(SDL_EventOK.userdata, event)) {

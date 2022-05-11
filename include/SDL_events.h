@@ -960,6 +960,7 @@ extern DECLSPEC int SDLCALL SDL_WaitEventTimeout(SDL_Event * event,
  * \sa SDL_RegisterEvents
  */
 extern DECLSPEC int SDLCALL SDL_PushEvent(SDL_Event * event);
+extern DECLSPEC int SDLCALL SDL_PushEvent_t(SDL_Event * event);
 
 /**
  * A function pointer used for callbacks that watch the event queue.
