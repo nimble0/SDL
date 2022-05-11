@@ -1117,7 +1117,7 @@ int
 SDL_PushEvent(SDL_Event * event)
 {
     event->common.timestamp = SDL_GetTicks();
-    SDL_PushEvent_t(event);
+    return SDL_PushEvent_t(event);
 }
 
 int
