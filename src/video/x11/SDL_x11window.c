@@ -240,6 +240,26 @@ X11_GetNetWMState(_THIS, Window xwindow)
     return flags;
 }
 
+void
+TimeSync(_THIS, Display* display, Window window)
+{
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    if (videodata->timeSynced)
+        return;
+
+    videodata->timeSynced = false;
+    videodata->timeSyncOffset = SDL_GetTicks();
+    X11_XChangeProperty(
+        display,
+        window,
+        videodata->TIME_SYNC,
+        X11_XInternAtom(display, "ATOM", False),
+        8,
+        PropModeAppend,
+        NULL,
+        0);
+}
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
 {
@@ -673,6 +693,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     X11_XSelectInput(display, RootWindow(display, screen), PropertyChangeMask);
 
     X11_XFlush(display);
+
+    TimeSync(_this, display, w);
 
     return 0;
 }

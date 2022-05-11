@@ -446,6 +446,7 @@ X11_VideoInit(_THIS)
     GET_ATOM(XdndFinished);
     GET_ATOM(XdndSelection);
     GET_ATOM(XKLAVIER_STATE);
+    GET_ATOM(TIME_SYNC);
 
     /* Detect the window manager */
     X11_CheckWindowManager(_this);
@@ -470,6 +471,8 @@ X11_VideoInit(_THIS)
     X11_InitMouse(_this);
 
     X11_InitTouch(_this);
+
+    data->timeSynced = false;
 
     return 0;
 }

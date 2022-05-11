@@ -1038,6 +1038,9 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
     case KeyPress:
     case KeyRelease: {
             KeyCode keycode = xevent->xkey.keycode;
+            Uint32 timestamp = (videodata->timeSynced)
+                ? xevent->xkey.time + videodata->timeSyncOffset
+                : 0;
             KeySym keysym = NoSymbol;
             char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
             Status status = 0;
@@ -1079,7 +1082,7 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
                 if (xevent->type == KeyPress) {
                     /* Don't send the key if it looks like a duplicate of a filtered key sent by an IME */
                     if (xevent->xkey.keycode != videodata->filter_code || xevent->xkey.time != videodata->filter_time) {
-                        SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode]);
+                        SDL_SendKeyboardKey_t(SDL_PRESSED, videodata->key_layout[keycode], timestamp);
                     }
                     if (*text) {
                         SDL_SendKeyboardText(text);
@@ -1089,7 +1092,7 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
                         /* We're about to get a repeated key down, ignore the key up */
                         break;
                     }
-                    SDL_SendKeyboardKey(SDL_RELEASED, videodata->key_layout[keycode]);
+                    SDL_SendKeyboardKey_t(SDL_RELEASED, videodata->key_layout[keycode], timestamp);
                 }
             }
 
@@ -1505,6 +1508,9 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
                     printf("New _NET_FRAME_EXTENTS: left=%d right=%d, top=%d, bottom=%d\n", data->border_left, data->border_right, data->border_top, data->border_bottom);
                     #endif
                 }
+            } else if (xevent->xproperty.atom == videodata->TIME_SYNC && !videodata->timeSynced) {
+                videodata->timeSynced = true;
+                videodata->timeSyncOffset -= xevent->xproperty.time;
             }
         }
         break;

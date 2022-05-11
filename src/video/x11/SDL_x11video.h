@@ -122,6 +122,7 @@ typedef struct SDL_VideoData
     Atom XdndFinished;
     Atom XdndSelection;
     Atom XKLAVIER_STATE;
+    Atom TIME_SYNC;
 
     SDL_Scancode key_layout[256];
     SDL_bool selection_waiting;
@@ -151,6 +152,9 @@ typedef struct SDL_VideoData
     void *vulkan_xlib_xcb_library;
     PFN_XGetXCBConnection vulkan_XGetXCBConnection;
 #endif
+
+    bool timeSynced;
+    Uint32 timeSyncOffset;
 
 } SDL_VideoData;
 
