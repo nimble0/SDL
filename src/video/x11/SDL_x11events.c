@@ -1040,7 +1040,7 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
             KeyCode keycode = xevent->xkey.keycode;
             Uint32 timestamp = (videodata->timeSynced)
                 ? xevent->xkey.time + videodata->timeSyncOffset
-                : 0;
+                : SDL_GetTicks();
             KeySym keysym = NoSymbol;
             char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
             Status status = 0;
@@ -1308,7 +1308,7 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
     case MotionNotify:{
             Uint32 timestamp = (videodata->timeSynced)
                 ? xevent->xmotion.time + videodata->timeSyncOffset
-                : 0;
+                : SDL_GetTicks();
             SDL_Mouse *mouse = SDL_GetMouse();
             if(!mouse->relative_mode || mouse->relative_mode_warp) {
 #ifdef DEBUG_MOTION
@@ -1323,7 +1323,7 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
     case ButtonPress:{
             Uint32 timestamp = (videodata->timeSynced)
                 ? xevent->xbutton.time + videodata->timeSyncOffset
-                : 0;
+                : SDL_GetTicks();
             int xticks = 0, yticks = 0;
 #ifdef DEBUG_XEVENTS
             printf("window %p: ButtonPress (X11 button = %d)\n", data, xevent->xbutton.button);
@@ -1362,7 +1362,7 @@ X11_DispatchEvent(_THIS, XEvent *xevent)
     case ButtonRelease:{
             Uint32 timestamp = (videodata->timeSynced)
                 ? xevent->xbutton.time + videodata->timeSyncOffset
-                : 0;
+                : SDL_GetTicks();
             int button = xevent->xbutton.button;
             /* The X server sends a Release event for each Press for wheels. Ignore them. */
             int xticks = 0, yticks = 0;
